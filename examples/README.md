@@ -1,5 +1,6 @@
 # PyFlink 从入门到精通
 
+* [0、Table API学习](#0 Table API学习)
 * [1、批处理 Word Count](#1批处理-word-count)
 * [2、自定义函数 UDF](#2自定义函数-udf)
 * [3、实时 MySQL CDC](#3实时-mysql-cdc)

@@ -6,7 +6,7 @@ https://ci.apache.org/projects/flink/flink-docs-master/zh/dev/python/table-api-u
 """
 import os
 import shutil
-from pyflink.table import EnvironmentSettings, DataTypes, BatchTableEnvironment
+from pyflink.table import EnvironmentSettings, DataTypes, BatchTableEnvironment, TableEnvironment
 from pyflink.table.udf import udf
 from pyflink.table.descriptors import OldCsv, Schema, FileSystem
 
@@ -14,7 +14,7 @@ from pyflink.table.descriptors import OldCsv, Schema, FileSystem
 
 # 创建 Flink 批处理环境
 env_settings = EnvironmentSettings.new_instance().in_batch_mode().use_blink_planner().build()
-t_env = BatchTableEnvironment.create(environment_settings=env_settings)
+t_env = TableEnvironment.create(environment_settings=env_settings)
 t_env.get_config().get_configuration().set_boolean("python.fn-execution.memory.managed", True)
 
 # ########################### 指定 python 依赖 ###########################
