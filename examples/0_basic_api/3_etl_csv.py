@@ -58,6 +58,7 @@ table_env_stream.execute_sql("""
 table_env_stream.execute_sql("""
  insert into file_sink(id,age,name,ts) 
      select id,age,name,ts from random_source
+     where id>20
 """).wait()
 
 # # 筛选后写入raw文件
@@ -95,24 +96,3 @@ table_env_stream.execute_sql("""
 #
 # # print(table_env_stream.from_path('random_source').to_pandas())
 
-
-# 流式查询数据
-table_env_stream.execute_sql('select * from file_sink ').print()
-
-# table_env_stream.execute_sql('select name ,sum(data),count(data) from random_source group by name ').print()
-
-# 流式窗口查询
-"""
-# 参考资料
-# https://ci.apache.org/projects/flink/flink-docs-release-1.13/zh/docs/dev/table/sql/queries/window-tvf/
-# """
-table_env_stream.execute_sql('''
-select TUMBLE_START(ts,interval '5' seconds),TUMBLE_END(ts,interval '5' seconds),avg(age) ,count(id)
-from file_sink
-group by tumble(ts ,interval '5' seconds )
-''').print()
-table_env_stream.execute_sql('''
-select TUMBLE_START(ts,interval '5' seconds),TUMBLE_END(ts,interval '5' seconds),avg(age) ,count(id)
-from random_source
-group by tumble(ts ,interval '5' seconds )
-''').print()

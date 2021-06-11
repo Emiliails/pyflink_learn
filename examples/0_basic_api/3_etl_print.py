@@ -14,9 +14,9 @@ org.apache.flink.table.api.ValidationException: Querying an unbounded table 'def
 
 """
 # 创建 blink  TableEnvironment
-env_settings_batch = EnvironmentSettings.new_instance().in_batch_mode().build()
-table_env_batch = TableEnvironment.create(env_settings_batch)
-table_env_batch.execute_sql("""
+env_settings = EnvironmentSettings.new_instance().in_streaming_mode().build()
+table_env = TableEnvironment.create(env_settings)
+table_env.execute_sql("""
     CREATE TABLE random_source (
         id INT, 
         data INT ,
@@ -34,27 +34,27 @@ table_env_batch.execute_sql("""
     )
 """)
 
-table_env_batch.execute_sql('select * from random_source').print()
+table_env.execute_sql('select * from random_source').print()
 
 
-#
-# table_env_stream.execute_sql("""
-#     CREATE TABLE print_sink (
-#         id INT,
-#         name STRING,
-#          data_sum INT
-#     ) WITH (
-#         'connector' = 'print'
-#     )
-# """)
-#
-# table_env_stream.execute_sql("""
-#     INSERT INTO print_sink
-#         SELECT id, name,sum(data) as data_sum FROM
-#             (SELECT id / 2 as id,name, data FROM random_source)
-#         WHERE id > 1
-#         GROUP BY id,name
-# """).wait()
+
+table_env.execute_sql("""
+    CREATE TABLE print_sink (
+        id INT,
+        name STRING,
+         data_sum INT
+    ) WITH (
+        'connector' = 'print'
+    )
+""")
+
+table_env.execute_sql("""
+    INSERT INTO print_sink
+        SELECT id, name,sum(data) as data_sum FROM
+            (SELECT id / 2 as id,name, data FROM random_source)
+        WHERE id > 1
+        GROUP BY id,name
+""").wait()
 #
 # # print(table_env_stream.from_path('random_source').to_pandas())
 
