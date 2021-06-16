@@ -25,7 +25,8 @@ for file in os.listdir(os.path.abspath(os.path.dirname(__file__))):
     if file.endswith('.jar'):
         jars.append(os.path.abspath(file))
 str_jars = ';'.join(['file://' + jar for jar in jars])
-t_env.get_config().get_configuration().set_string("pipeline.jars", str_jars)
+#str_jars = '/Users/yikuang/BaiduPan/信息科技大学/J教学/2020-2021(2)/流数据/pyflink_learn/examples/3_database_sync/flink-sql-connector-mysql-cdc-1.4.0.jar'
+t_env.get_config().get_configuration().set_string("pipeline.classpaths", str_jars)
 
 # ########################### 创建源表(source) ###########################
 # 使用 MySQL-CDC 连接器从 MySQL 的 binlog 里提取更改。
@@ -37,7 +38,7 @@ t_env.execute_sql(f"""
         username STRING          -- 姓名
     ) WITH (
         'connector' = 'mysql-cdc',
-        'hostname' = 'gpu2',
+        'hostname' = 'gpu',
         'port' = '9904',
         'database-name' = 'test',
         'table-name' = 'user',
@@ -45,9 +46,14 @@ t_env.execute_sql(f"""
         'password' = 'root'
     )
 """)
-t_env.execute_sql('select * from source').print()
+
+t_env.from_path('source').print_schema()  # 查看 schema
+
 # 查看数据
-# t_env.from_path('source').print_schema()  # 查看 schema
+t_env.execute_sql('select * from source ').print()
+
+# 查看数据
+#
 # t_env.from_path('source').to_pandas()  # 转为 pandas.DataFrame
 
 # ########################### 创建结果表(sink) ###########################
