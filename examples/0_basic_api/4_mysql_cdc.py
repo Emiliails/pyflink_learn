@@ -38,7 +38,7 @@ t_env.execute_sql(f"""
         username STRING          -- 姓名
     ) WITH (
         'connector' = 'mysql-cdc',
-        'hostname' = 'gpu',
+        'hostname' = '127.0.0.1',
         'port' = '9904',
         'database-name' = 'test',
         'table-name' = 'user',
@@ -47,10 +47,9 @@ t_env.execute_sql(f"""
     )
 """)
 
-t_env.from_path('source').print_schema()  # 查看 schema
+#t_env.from_path('source').print_schema()  # 查看 schema
 
-# 查看数据
-t_env.execute_sql('select * from source ').print()
+
 
 # 查看数据
 #
@@ -62,31 +61,39 @@ t_env.execute_sql('select * from source ').print()
 # 在追加模式下，Flink 将所有记录解释为 INSERT 消息，如果在基础数据库中发生主键或唯一约束冲突，则 INSERT 操作可能会失败。
 #
 # # 基于 SQL API
-# t_env.execute_sql(f"""
-#     CREATE TABLE sink (
-#         id INT,                            -- ID
-#         username STRING,                       -- 姓名
-#         PRIMARY KEY (id) NOT ENFORCED      -- 需要定义主键，让连接器在 upsert 模式下运行
-#     ) WITH (
-#         'connector' = 'jdbc',
-#         'url' = 'jdbc:mysql://127.0.0.1:3307/flink',
-#         'driver' = 'com.mysql.cj.jdbc.Driver',
-#         'table-name' = 'case3',
-#         'username' = 'root',
-#         'password' = 'root'
-#     )
-# """)
-#
+t_env.execute_sql(f"""
+    CREATE TABLE sink (
+        id INT,                            -- ID
+        username STRING,                       -- 姓名
+        PRIMARY KEY (id) NOT ENFORCED      -- 需要定义主键，让连接器在 upsert 模式下运行
+    ) WITH (
+        'connector' = 'jdbc',
+        'url' = 'jdbc:mysql://127.0.0.1:9904/test',
+        'driver' = 'com.mysql.cj.jdbc.Driver',
+        'table-name' = 'sink',
+        'username' = 'root',
+        'password' = 'root'
+    )
+""")
+
 # # ########################### 批处理任务 ###########################
 #
 # # 方式1
-# t_env.from_path('source').insert_into('sink')
+#t_env.from_path('source').execute_insert('sink', False)
 #
-# # 方式2
-# # t_env.sql_query("""
-# #     SELECT id,
-# #            name
-# #     FROM source
-# # """).insert_into('sink')
+# 方式2
+t_env.sql_query("""
+     SELECT id,
+            username
+     FROM source
+     where id > 200
+ """).execute_insert('sink').wait()
+
 #
-# t_env.execute('sync by binlog')
+#
+
+#
+# # 查看数据
+# result = t_env.execute_sql('select * from source ')
+# with result.collect() as results:
+#     for r in results:
